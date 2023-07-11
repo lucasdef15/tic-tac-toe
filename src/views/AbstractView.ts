@@ -1,6 +1,8 @@
+import Data from '../logic/data';
+
 interface AbstractView {
   setTitle(title: string): void;
-  getHTML(data: { name: string; ties: number }): Promise<string>;
+  getHTML(data: Data): Promise<string>;
 }
 
 export default class implements AbstractView {
@@ -10,7 +12,7 @@ export default class implements AbstractView {
     document.title = title;
   }
 
-  async getHTML(data: { name: string; ties: number }) {
+  async getHTML(data: Data) {
     return '';
   }
 }

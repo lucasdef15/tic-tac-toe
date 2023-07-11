@@ -1,4 +1,5 @@
 import AbstractView from './AbstractView';
+import Data from '../logic/data';
 
 export default class extends AbstractView {
   constructor() {
@@ -6,7 +7,7 @@ export default class extends AbstractView {
     this.setTitle('Game Board');
   }
 
-  async getHTML(data: { name: string; ties: number }): Promise<string> {
+  async getHTML(data: Data): Promise<string> {
     return `
         <main class='container'>
                 <div class="header">
@@ -15,20 +16,20 @@ export default class extends AbstractView {
                             <img src="/assets/icon-x-grey.svg">
                             turn
                         </span>
-                        <button class='restart'>
+                        <button class='restart' data-restart>
                                 <img src="/assets/icon-restart.svg" alt="restart">
                         </button>
                 </div>
                 <div class="board">
-                        <div class="cell"></div>
-                        <div class="cell"></div>
-                        <div class="cell"></div>
-                        <div class="cell"></div>
-                        <div class="cell"></div>
-                        <div class="cell"></div>
-                        <div class="cell"></div>
-                        <div class="cell"></div>
-                        <div class="cell"></div>
+                        <div class="cell" data-cell></div>
+                        <div class="cell" data-cell></div>
+                        <div class="cell" data-cell></div>
+                        <div class="cell" data-cell></div>
+                        <div class="cell" data-cell></div>
+                        <div class="cell" data-cell></div>
+                        <div class="cell" data-cell></div>
+                        <div class="cell" data-cell></div>
+                        <div class="cell" data-cell></div>
                 </div>
                 <div class="footer">
                         <div class="counter blue bs-none">
@@ -45,7 +46,7 @@ export default class extends AbstractView {
                         </div>
                 </div>
         </main>
-        <div class='message-wrapper'>
+        <div class='message-wrapper' data-message>
                 <div class="message">
                     <p>you won!</p>
                     <div class="winner">
@@ -53,7 +54,7 @@ export default class extends AbstractView {
                         <h1>Takes the roud</h1>
                     </div>
                     <div class="button-wrapper">
-                            <button class='grey'>quit</button>
+                            <button class='grey' data-restart>quit</button>
                             <button class='yellow'>next roud</button>
                     </div>
                 </div>

@@ -1,9 +1,11 @@
 import GameBoard from '../views/GameBoard';
 import Dashboard from '../views/Dashboard';
+import AbstractView from '../views/AbstractView';
+import Data from '../logic/data';
 
 interface RouteObj {
   path: string;
-  view: typeof GameBoard;
+  view: new () => AbstractView;
 }
 
 interface MatchesObj {
@@ -14,11 +16,6 @@ interface MatchesObj {
 export const naviagteTo = (url: string): void => {
   history.pushState(null, '', url);
   router();
-};
-
-const data = {
-  name: 'test',
-  ties: 5,
 };
 
 const router = async () => {
@@ -50,7 +47,9 @@ const router = async () => {
 
   const view = new match.route.view();
 
-  document.querySelector('#app')!.innerHTML = await view.getHTML(data);
+  document.querySelector('#app')!.innerHTML = '';
+  document.querySelector('#app')!.innerHTML = await view.getHTML(Data);
+  console.log(Data);
 };
 
 export default router;
