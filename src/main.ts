@@ -1,41 +1,52 @@
 import './styles/main.css';
 import './styles/gameboard.css';
-import router, { naviagteTo } from './routes/router';
+import router, { navigateTo } from './routes/router';
 import Game from './logic/game';
-import Data from './logic/data';
+import store from './store/store';
 
-window.addEventListener('popstate', router);
+window.addEventListener('popstate', () => router(store.getState()));
 
 document.addEventListener('DOMContentLoaded', () => {
-  let circleTurn: boolean;
-
   document.body.addEventListener('change', (event) => {
     if (
       event.target instanceof Element &&
       event.target.matches('[data-input]')
     ) {
-      let inputElement = event.target as HTMLInputElement;
-      circleTurn = inputElement.checked;
-      Data.isCircle = circleTurn;
-      setTimeout(() => Game.instance.startGame(circleTurn), 100);
+      store.dispatch({ type: 'CHECK_CIRCLE' });
+      store.dispatch({ type: 'SET_PLAYER' });
     }
   });
   document.body.addEventListener('click', (e: MouseEvent) => {
     const event = e.target as HTMLAnchorElement;
     if (event.matches('[data-link]')) {
       e.preventDefault();
-      naviagteTo(event.href);
-      setTimeout(() => Game.instance.startGame(circleTurn), 100);
+      navigateTo(event.href);
+      setTimeout(() => Game.instance.startGame(), 100);
     } else if (event.matches('[data-cell]')) {
       Game.instance.handleClick(e);
     } else if (event.matches('[data-restart]')) {
-      Game.instance.startGame(true);
+      Game.instance.startGame();
     }
   });
-  router();
+  router(store.getState());
+
   if (location.pathname !== '/') {
-    setTimeout(() => Game.instance.startGame(circleTurn), 100);
+    setTimeout(() => Game.instance.startGame(), 100);
   } else {
     return;
+  }
+});
+
+store.subscribe(() => {
+  const state = store.getState();
+  router(state);
+  console.log(state);
+
+  // Update the input element based on the state
+  const inputElement = document.querySelector(
+    '[data-input]'
+  ) as HTMLInputElement;
+  if (inputElement) {
+    inputElement.checked = state.isCircle;
   }
 });

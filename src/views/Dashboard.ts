@@ -1,5 +1,5 @@
 import AbstractView from './AbstractView';
-import Data from '../logic/data';
+import { State } from '../store/store';
 
 export default class extends AbstractView {
   constructor() {
@@ -7,8 +7,8 @@ export default class extends AbstractView {
     this.setTitle('Tic TacToe');
   }
 
-  async getHTML(Data: Data): Promise<string> {
-    console.log(Data);
+  async getHTML(state: State): Promise<string> {
+    const isCircleChecked = state.isCircle ? 'checked' : '';
     return `
     <main class="container">
         <img src="/assets/logo.svg" alt="logo" />
@@ -16,7 +16,7 @@ export default class extends AbstractView {
         <h1>pick player 1's mark</h1>
         <div class="toggle">
             <label class="switch">
-            <input type="checkbox" data-input checked='${Data.isCircle}' />
+            <input type="checkbox" data-input ${isCircleChecked}/>
             <span class="slider round">
                 <img src="/assets/icon-x-grey.svg" alt="x" />
                 <img src="/assets/icon-o-grey.svg" alt="o" />

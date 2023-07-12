@@ -1,11 +1,11 @@
-import Data from './data';
+import store from '../store/store';
 
 type CircleOrX = 'circle' | 'x';
 
 export default class Game {
   static instance: Game = new Game();
 
-  private circleTurn: boolean = false;
+  private circleTurn: boolean = store.getState().isCircle;
   private X_CLASS: 'x' = 'x';
   private CIRCLE_CLASS: 'circle' = 'circle';
   private WINNING_COMBINATIONS: number[][] = [
@@ -19,12 +19,9 @@ export default class Game {
     [2, 4, 6],
   ];
 
-  private constructor() {}
-
-  startGame(circleTurn: boolean) {
-    this.circleTurn = circleTurn;
+  startGame() {
     const cellElements = document.querySelectorAll('[data-cell]');
-
+    this.circleTurn = store.getState().isCircle;
     if (cellElements.length) {
       this.setBoardHoverClass();
       const message = document.querySelector(
@@ -36,18 +33,29 @@ export default class Game {
         cell.classList.remove(this.CIRCLE_CLASS);
       });
     }
+    store.dispatch({ type: 'CLEAR_BOARD' });
+    store.dispatch({ type: 'SET_PLAYER' });
   }
 
   handleClick(e: MouseEvent) {
     const cell = e.target as HTMLElement;
+
+    const index = cell.getAttribute('data-value') as unknown as number;
+
     if (cell.classList.contains('x') || cell.classList.contains('circle'))
       return;
+
     const currentClass: CircleOrX = this.circleTurn
       ? this.CIRCLE_CLASS
       : this.X_CLASS;
-    this.placeMark(cell, currentClass);
+
+    this.placeMark(cell, currentClass, index);
+
     if (this.checkWIn(currentClass)) {
-      this.endGame(false);
+      store.dispatch({ type: 'CLEAR_BOARD' });
+      store.dispatch({ type: 'INCREMENT_YOU' });
+      setTimeout(() => this.endGame(false), 100);
+      setTimeout(() => this.showMessage(), 100);
     } else if (this.isDraw()) {
       this.endGame(true);
     } else {
@@ -71,19 +79,28 @@ export default class Game {
       console.log('draaw');
       // display message if draw
     } else {
-      const message = document.querySelector(
-        '[data-message]'
-      ) as HTMLDivElement;
-      message.classList.add('show');
+      store.dispatch({
+        type: 'SET_WINNER',
+        payload: this.circleTurn ? 'circle' : 'x',
+      });
     }
   }
+  showMessage() {
+    const message = document.querySelector('[data-message]') as HTMLDivElement;
+    message.classList.add('show');
+  }
 
-  placeMark(cell: HTMLElement, currentClass: CircleOrX) {
+  placeMark(cell: HTMLElement, currentClass: CircleOrX, index: number) {
     cell.classList.add(currentClass);
+    store.dispatch({
+      type: 'ADD_BOARD_POSITION',
+      payload: { index, mark: currentClass },
+    });
   }
 
   swapTurns() {
     this.circleTurn = !this.circleTurn;
+    store.dispatch({ type: 'CHECK_CIRCLE' });
   }
   setBoardHoverClass() {
     let board = document.querySelector('.board') as HTMLDivElement;

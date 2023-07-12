@@ -1,7 +1,7 @@
 import GameBoard from '../views/GameBoard';
 import Dashboard from '../views/Dashboard';
 import AbstractView from '../views/AbstractView';
-import Data from '../logic/data';
+import store from '../store/store';
 
 interface RouteObj {
   path: string;
@@ -13,12 +13,12 @@ interface MatchesObj {
   isMatch: boolean;
 }
 
-export const naviagteTo = (url: string): void => {
+export const navigateTo = (url: string): void => {
   history.pushState(null, '', url);
-  router();
+  router(store.getState());
 };
 
-const router = async () => {
+const router = async (state: any) => {
   const routes: RouteObj[] = [
     // { path: '/404', view: () => console.log('viewing 404 page') },
     { path: '/', view: Dashboard },
@@ -47,9 +47,7 @@ const router = async () => {
 
   const view = new match.route.view();
 
-  document.querySelector('#app')!.innerHTML = '';
-  document.querySelector('#app')!.innerHTML = await view.getHTML(Data);
-  console.log(Data);
+  document.querySelector('#app')!.innerHTML = await view.getHTML(state);
 };
 
 export default router;
