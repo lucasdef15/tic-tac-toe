@@ -26,8 +26,8 @@ export default class extends AbstractView {
         <p>remember: x goes first</p>
         </section>
         <section class="button-box">
-            <a href="/gameboard/cpu" class="btn yellow" data-link>new game (vs cpu)</a>
-            <a href="/gameboard/player" class="btn blue" data-link>new game (vs player)</a>
+            <a href="/gameboard/cpu" class="btn yellow" data-link data-cpu>new game (vs cpu)</a>
+            <a href="/gameboard/player" class="btn blue" data-link data-player>new game (vs player)</a>
         </section>
     </main>
       `;

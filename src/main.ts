@@ -4,7 +4,7 @@ import router, { navigateTo } from './routes/router';
 import Game from './logic/game';
 import store from './store/store';
 
-window.addEventListener('popstate', () => router(store.getState()));
+window.addEventListener('popstate', () => router(store.getState())); //remeber to reset every state
 
 document.addEventListener('DOMContentLoaded', () => {
   document.body.addEventListener('change', (event) => {
@@ -12,41 +12,57 @@ document.addEventListener('DOMContentLoaded', () => {
       event.target instanceof Element &&
       event.target.matches('[data-input]')
     ) {
-      store.dispatch({ type: 'CHECK_CIRCLE' });
-      store.dispatch({ type: 'SET_PLAYER' });
+      handleChange();
     }
   });
-  document.body.addEventListener('click', (e: MouseEvent) => {
+
+  document.body.addEventListener('click', async (e: MouseEvent) => {
     const event = e.target as HTMLAnchorElement;
     if (event.matches('[data-link]')) {
-      e.preventDefault();
-      navigateTo(event.href);
-      setTimeout(() => Game.instance.startGame(), 100);
+      handleLinkClick(e);
     } else if (event.matches('[data-cell]')) {
       Game.instance.handleClick(e);
     } else if (event.matches('[data-restart]')) {
       Game.instance.startGame();
+    } else if (event.matches('[data-quit]')) {
+      store.dispatch({ type: 'QUIT_GAME' });
+      navigateTo(e);
     }
   });
-  router(store.getState());
+
+  initializeApp();
 
   if (location.pathname !== '/') {
     setTimeout(() => Game.instance.startGame(), 100);
-  } else {
-    return;
   }
 });
 
 store.subscribe(() => {
-  const state = store.getState();
-  router(state);
-  console.log(state);
-
-  // Update the input element based on the state
-  const inputElement = document.querySelector(
-    '[data-input]'
-  ) as HTMLInputElement;
-  if (inputElement) {
-    inputElement.checked = state.isCircle;
-  }
+  router(store.getState());
+  console.log(store.getState());
 });
+
+function handleLinkClick(event: MouseEvent) {
+  store.dispatch({ type: 'SET_PLAYER' });
+  if ((event.target as HTMLAnchorElement).hasAttribute('data-cpu')) {
+    store.dispatch({ type: 'SET_CPU_OR_PLAYER', payload: 'cpu' });
+  } else if ((event.target as HTMLAnchorElement).hasAttribute('data-player')) {
+    store.dispatch({ type: 'SET_CPU_OR_PLAYER', payload: 'player' });
+  }
+  if (store.getState().cpu_or_player === 'cpu') {
+    navigateTo(event);
+    Game.instance.startGame();
+  } else {
+    navigateTo(event);
+    Game.instance.startGame();
+  }
+}
+
+function initializeApp() {
+  router(store.getState());
+}
+
+function handleChange() {
+  store.dispatch({ type: 'CHECK_CIRCLE' });
+  store.dispatch({ type: 'SET_PLAYER' });
+}

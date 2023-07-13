@@ -163,7 +163,9 @@
   gap: 16px;
   justify-content: center;
 }
-.button-wrapper button {
+.button-wrapper button, 
+.button-wrapper a {
+  text-decoration: none;
   font-family: inherit;
   color: var(--blue-900);
   text-transform: uppercase;
@@ -175,7 +177,8 @@
   border-radius: calc(var(--border) - 5px);
   cursor: pointer;
 }
-.button-wrapper button:hover {
+.button-wrapper button:hover,
+.button-wrapper a:hover {
   filter: brightness(115%);
 }
 .button-wrapper .grey {

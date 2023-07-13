@@ -34,33 +34,42 @@ export default class Game {
       });
     }
     store.dispatch({ type: 'CLEAR_BOARD' });
-    store.dispatch({ type: 'SET_PLAYER' });
+    store.dispatch({ type: 'SET_TIE', payload: false });
+
   }
 
   handleClick(e: MouseEvent) {
     const cell = e.target as HTMLElement;
-
     const index = cell.getAttribute('data-value') as unknown as number;
-
+  
     if (cell.classList.contains('x') || cell.classList.contains('circle'))
       return;
-
+  
     const currentClass: CircleOrX = this.circleTurn
       ? this.CIRCLE_CLASS
       : this.X_CLASS;
-
+  
     this.placeMark(cell, currentClass, index);
-
+  
     if (this.checkWIn(currentClass)) {
-      store.dispatch({ type: 'CLEAR_BOARD' });
-      store.dispatch({ type: 'INCREMENT_YOU' });
-      setTimeout(() => this.endGame(false), 100);
-      setTimeout(() => this.showMessage(), 100);
+      this.endGame(false)
+        .then(() => this.incrementPLayers())
+        .then(() => this.showMessage());
     } else if (this.isDraw()) {
-      this.endGame(true);
+      this.endGame(true).then(() => this.showMessage());
     } else {
       this.swapTurns();
       this.setBoardHoverClass();
+    }
+  }
+
+  async incrementPLayers() {
+    const { player, current_winner } = store.getState();
+
+    if (player === current_winner) {
+      store.dispatch({ type: 'INCREMENT_P1' });
+    } else {
+      store.dispatch({ type: 'INCREMENT_P2' });
     }
   }
 
@@ -74,18 +83,24 @@ export default class Game {
     });
   }
 
-  endGame(draw: boolean) {
+  async endGame(draw: boolean) {
     if (draw) {
-      console.log('draaw');
-      // display message if draw
+      store.dispatch({ type: 'SET_TIE', payload: true });
+      store.dispatch({ type: 'INCREMENT_TIES' });
     } else {
+      const currentClass: CircleOrX = this.circleTurn
+        ? this.CIRCLE_CLASS
+        : this.X_CLASS;
       store.dispatch({
         type: 'SET_WINNER',
-        payload: this.circleTurn ? 'circle' : 'x',
+        payload: currentClass,
       });
     }
+
+    return new Promise((resolve) => setTimeout(resolve, 100));
   }
-  showMessage() {
+
+  async showMessage() {
     const message = document.querySelector('[data-message]') as HTMLDivElement;
     message.classList.add('show');
   }

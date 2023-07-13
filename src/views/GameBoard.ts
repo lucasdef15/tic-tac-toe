@@ -27,7 +27,7 @@ export default class extends AbstractView {
                             turn
                         </span>
                         <button class='restart' data-restart>
-                                <img src="/assets/icon-restart.svg" alt="restart">
+                                <img src="/assets/icon-restart.svg" alt="restart" data-restart>
                         </button>
                 </div>
                 <div class="board ${state.isCircle ? 'circle' : 'x'}">
@@ -35,39 +35,59 @@ export default class extends AbstractView {
                 </div>
                 <div class="footer">
                         <div class="counter blue bs-none">
-                                <span>x (you)</span>
-                                <span>${state.you}</span>
+                                <span>x (${
+                                  state.player === 'x' ? 'p1' : 'p2'
+                                })</span>
+                                <span>${
+                                  state.player === 'x' ? state.p1 : state.p2
+                                }</span>
                         </div>
                         <div class="counter grey">
                                 <span>ties</span>
                                 <span>${state.ties}</span>
                         </div>
                         <div class="counter yellow bs-none">
-                                <span>o (cpu)</span>
-                                <span>${state.cpu}</span>
+                                <span>o (${
+                                  state.player === 'circle' ? 'p1' : 'p2'
+                                })</span>
+                                <span>${
+                                  state.player === 'circle'
+                                    ? state.p1
+                                    : state.p2
+                                }</span>
                         </div>
                 </div>
         </main>
         <div class='message-wrapper' data-message>
                 <div class="message">
-                    <p>${
-                      state.player === state.current_winner
-                        ? 'player 1 wins!'
-                        : 'player 2 wins!'
-                    }</p>
+                    ${
+                      !state.isTie
+                        ? `<p>${
+                            state.player === state.current_winner
+                              ? 'player 1 wins!'
+                              : 'player 2 wins!'
+                          }</p>`
+                        : ''
+                    }
                     <div class="winner">
-                        <img src="/assets/icon-${
-                          state.current_winner === 'circle' ? 'o' : 'x'
-                        }.svg" alt="x">
+                        ${
+                          !state.isTie
+                            ? `<img src="/assets/icon-${
+                                state.current_winner === 'circle' ? 'o' : 'x'
+                              }.svg" alt="x">`
+                            : ''
+                        }
                         <h1 style='color: ${
-                          state.current_winner === 'circle'
-                            ? '#f2b137'
-                            : '#31c3bd'
-                        }'>Takes the roud</h1>
+                          !state.isTie
+                            ? state.current_winner === 'circle'
+                              ? '#f2b137'
+                              : '#31c3bd'
+                            : '#a8bfc9'
+                        }'>${state.isTie ? 'round tied' : 'Takes the roud'}</h1>
                     </div>
                     <div class="button-wrapper">
-                            <button class='grey' data-restart>quit</button>
-                            <button class='yellow'>next roud</button>
+                            <a href='/' class='grey' data-quit>quit</a>
+                            <button class='yellow' data-restart>next roud</button>
                     </div>
                 </div>
         </div>

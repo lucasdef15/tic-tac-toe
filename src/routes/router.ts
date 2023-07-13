@@ -13,7 +13,9 @@ interface MatchesObj {
   isMatch: boolean;
 }
 
-export const navigateTo = (url: string): void => {
+export const navigateTo = (event: MouseEvent): void => {
+  event.preventDefault();
+  const url = (event.target as HTMLAnchorElement).href;
   history.pushState(null, '', url);
   router(store.getState());
 };
