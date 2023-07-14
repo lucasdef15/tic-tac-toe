@@ -23,7 +23,6 @@ export default class Game {
     const cellElements = document.querySelectorAll('[data-cell]');
     this.circleTurn = store.getState().isCircle;
     if (cellElements.length) {
-      this.setBoardHoverClass();
       const message = document.querySelector(
         '[data-message]'
       ) as HTMLDivElement;
@@ -36,21 +35,85 @@ export default class Game {
     store.dispatch({ type: 'CLEAR_BOARD' });
     store.dispatch({ type: 'SET_TIE', payload: false });
 
+    const cpuMark = store.getState().player === 'circle' ? this.X_CLASS : this.CIRCLE_CLASS
+    if(cpuMark === store.getState().current_winner) {
+      this.startGameCPU()
+    }
+  }
+  startGameCPU() {
+    const cpuMark: CircleOrX =
+      store.getState().player === 'circle' ? this.X_CLASS : this.CIRCLE_CLASS;
+    const firstToPLay = cpuMark === 'x' ? 'cpu' : 'player';
+
+    if (firstToPLay === 'cpu') {
+      setTimeout(() => this.startCPU(cpuMark), 100);
+    }
+  }
+  startCPU(cpuMark: CircleOrX) {
+    let occupiedPositions: number[] = [];
+
+    const cellElements = document.querySelectorAll('[data-cell]');
+
+    const boardElements = store.getState().boardPositions.map((cell) => {
+      return cell !== null;
+    });
+
+    boardElements.forEach((element, index) => {
+      if (element === true) {
+        occupiedPositions.push(index);
+      }
+    });
+
+    let randomNumber = this.getRandomNumber(0, 8);
+
+    // Check if the randomly generated number is in the occupied positions array
+    while (occupiedPositions.includes(randomNumber)) {
+      randomNumber = this.getRandomNumber(0, 8); // Generate a new random number
+    }
+
+    store.dispatch({
+      type: 'ADD_BOARD_POSITION',
+      payload: { index: randomNumber, mark: cpuMark },
+    });
+
+    const cell = [...cellElements][randomNumber];
+
+    const clickEvent = new MouseEvent('click', {
+      view: window,
+    });
+
+
+    cell.dispatchEvent(clickEvent);
+
+    if (this.checkWIn(cpuMark)) {
+      this.endGame(false)
+        .then(() => this.incrementPLayers())
+        .then(() => this.showMessage());
+    }
+  }
+
+  getRandomNumber(min: number, max: number): number {
+    let randomNumber = Math.floor(Math.random() * (max - min + 1)) + min;
+
+    return randomNumber;
   }
 
   handleClick(e: MouseEvent) {
     const cell = e.target as HTMLElement;
     const index = cell.getAttribute('data-value') as unknown as number;
-  
+
+    const cpuMark: CircleOrX =
+      store.getState().player === 'circle' ? this.X_CLASS : this.CIRCLE_CLASS;
+
     if (cell.classList.contains('x') || cell.classList.contains('circle'))
       return;
-  
+
     const currentClass: CircleOrX = this.circleTurn
       ? this.CIRCLE_CLASS
       : this.X_CLASS;
-  
-    this.placeMark(cell, currentClass, index);
-  
+
+    this.placeMark(currentClass, index);
+
     if (this.checkWIn(currentClass)) {
       this.endGame(false)
         .then(() => this.incrementPLayers())
@@ -58,8 +121,11 @@ export default class Game {
     } else if (this.isDraw()) {
       this.endGame(true).then(() => this.showMessage());
     } else {
-      this.swapTurns();
-      this.setBoardHoverClass();
+      if (store.getState().cpu_or_player === 'cpu') {
+        this.startCPU(cpuMark);
+      } else {
+        this.swapTurns();
+      }
     }
   }
 
@@ -88,9 +154,16 @@ export default class Game {
       store.dispatch({ type: 'SET_TIE', payload: true });
       store.dispatch({ type: 'INCREMENT_TIES' });
     } else {
-      const currentClass: CircleOrX = this.circleTurn
+      let currentClass: CircleOrX = this.circleTurn
         ? this.CIRCLE_CLASS
         : this.X_CLASS;
+
+      if (store.getState().cpu_or_player === 'cpu') {
+        if(this.checkCPUWins(currentClass)){
+          currentClass = store.getState().player === 'circle' ? this.X_CLASS : this.CIRCLE_CLASS
+        }
+      }
+
       store.dispatch({
         type: 'SET_WINNER',
         payload: currentClass,
@@ -99,14 +172,15 @@ export default class Game {
 
     return new Promise((resolve) => setTimeout(resolve, 100));
   }
-
+  checkCPUWins(currentClass: CircleOrX): boolean {
+    return this.checkWIn(currentClass) ? false : true;
+  }
   async showMessage() {
     const message = document.querySelector('[data-message]') as HTMLDivElement;
     message.classList.add('show');
   }
 
-  placeMark(cell: HTMLElement, currentClass: CircleOrX, index: number) {
-    cell.classList.add(currentClass);
+  placeMark(currentClass: CircleOrX, index: number) {
     store.dispatch({
       type: 'ADD_BOARD_POSITION',
       payload: { index, mark: currentClass },
@@ -117,22 +191,13 @@ export default class Game {
     this.circleTurn = !this.circleTurn;
     store.dispatch({ type: 'CHECK_CIRCLE' });
   }
-  setBoardHoverClass() {
-    let board = document.querySelector('.board') as HTMLDivElement;
-    board.classList.remove(this.X_CLASS);
-    board.classList.remove(this.CIRCLE_CLASS);
-    if (this.circleTurn) {
-      board.classList.add(this.CIRCLE_CLASS);
-    } else {
-      board.classList.add(this.X_CLASS);
-    }
-  }
 
   checkWIn(currentClass: CircleOrX) {
-    const cellElements = document.querySelectorAll('[data-cell]');
+    const cellElements = store.getState().boardPositions;
+
     return this.WINNING_COMBINATIONS.some((combination) => {
       return combination.every((index) => {
-        return cellElements[index].classList.contains(currentClass);
+        return cellElements[index] === currentClass;
       });
     });
   }

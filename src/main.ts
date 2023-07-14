@@ -31,10 +31,6 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   initializeApp();
-
-  if (location.pathname !== '/') {
-    setTimeout(() => Game.instance.startGame(), 100);
-  }
 });
 
 store.subscribe(() => {
@@ -51,10 +47,9 @@ function handleLinkClick(event: MouseEvent) {
   }
   if (store.getState().cpu_or_player === 'cpu') {
     navigateTo(event);
-    Game.instance.startGame();
+    Game.instance.startGameCPU();
   } else {
     navigateTo(event);
-    Game.instance.startGame();
   }
 }
 
