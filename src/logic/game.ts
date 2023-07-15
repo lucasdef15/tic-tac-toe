@@ -35,9 +35,10 @@ export default class Game {
     store.dispatch({ type: 'CLEAR_BOARD' });
     store.dispatch({ type: 'SET_TIE', payload: false });
 
-    const cpuMark = store.getState().player === 'circle' ? this.X_CLASS : this.CIRCLE_CLASS
-    if(cpuMark === store.getState().current_winner) {
-      this.startGameCPU()
+    const cpuMark =
+      store.getState().player === 'circle' ? this.X_CLASS : this.CIRCLE_CLASS;
+    if (cpuMark === store.getState().current_winner) {
+      this.startGameCPU();
     }
   }
   startGameCPU() {
@@ -46,28 +47,29 @@ export default class Game {
     const firstToPLay = cpuMark === 'x' ? 'cpu' : 'player';
 
     if (firstToPLay === 'cpu') {
-      setTimeout(() => this.startCPU(cpuMark), 100);
+      this.startCPU(cpuMark);
+    } else if (firstToPLay === 'player') {
+      if (store.getState().count !== 0) {
+        this.startCPU(cpuMark);
+      }
     }
   }
   startCPU(cpuMark: CircleOrX) {
-    let occupiedPositions: number[] = [];
-
     const cellElements = document.querySelectorAll('[data-cell]');
+    const occupiedPositions = store
+      .getState()
+      .boardPositions.map((cell) => cell !== null);
 
-    const boardElements = store.getState().boardPositions.map((cell) => {
-      return cell !== null;
-    });
-
-    boardElements.forEach((element, index) => {
-      if (element === true) {
-        occupiedPositions.push(index);
-      }
-    });
+    if (occupiedPositions.every((element) => element === true)) {
+      this.endGame(true).then(() => this.showMessage());
+      // make the message proporly tomorrow
+      return;
+    }
 
     let randomNumber = this.getRandomNumber(0, 8);
 
     // Check if the randomly generated number is in the occupied positions array
-    while (occupiedPositions.includes(randomNumber)) {
+    while (occupiedPositions[randomNumber]) {
       randomNumber = this.getRandomNumber(0, 8); // Generate a new random number
     }
 
@@ -81,7 +83,6 @@ export default class Game {
     const clickEvent = new MouseEvent('click', {
       view: window,
     });
-
 
     cell.dispatchEvent(clickEvent);
 
@@ -99,6 +100,8 @@ export default class Game {
   }
 
   handleClick(e: MouseEvent) {
+    store.dispatch({ type: 'INCREMENT_COUNT' });
+
     const cell = e.target as HTMLElement;
     const index = cell.getAttribute('data-value') as unknown as number;
 
@@ -108,9 +111,13 @@ export default class Game {
     if (cell.classList.contains('x') || cell.classList.contains('circle'))
       return;
 
-    const currentClass: CircleOrX = this.circleTurn
+    let currentClass: CircleOrX = this.circleTurn
       ? this.CIRCLE_CLASS
       : this.X_CLASS;
+
+    if (store.getState().cpu_or_player === 'cpu') {
+      currentClass = store.getState().player === 'circle' ? 'circle' : 'x';
+    }
 
     this.placeMark(currentClass, index);
 
@@ -154,14 +161,19 @@ export default class Game {
       store.dispatch({ type: 'SET_TIE', payload: true });
       store.dispatch({ type: 'INCREMENT_TIES' });
     } else {
-      let currentClass: CircleOrX = this.circleTurn
-        ? this.CIRCLE_CLASS
-        : this.X_CLASS;
+      let currentClass: CircleOrX;
+      const state = store.getState();
 
-      if (store.getState().cpu_or_player === 'cpu') {
-        if(this.checkCPUWins(currentClass)){
-          currentClass = store.getState().player === 'circle' ? this.X_CLASS : this.CIRCLE_CLASS
-        }
+      if (state.cpu_or_player === 'cpu') {
+        const playerClass =
+          state.player === 'circle' ? this.CIRCLE_CLASS : this.X_CLASS;
+        currentClass = this.checkCPUWins(playerClass)
+          ? playerClass === this.CIRCLE_CLASS
+            ? this.X_CLASS
+            : this.CIRCLE_CLASS
+          : playerClass;
+      } else {
+        currentClass = this.circleTurn ? this.CIRCLE_CLASS : this.X_CLASS;
       }
 
       store.dispatch({
@@ -172,6 +184,7 @@ export default class Game {
 
     return new Promise((resolve) => setTimeout(resolve, 100));
   }
+
   checkCPUWins(currentClass: CircleOrX): boolean {
     return this.checkWIn(currentClass) ? false : true;
   }
@@ -179,19 +192,16 @@ export default class Game {
     const message = document.querySelector('[data-message]') as HTMLDivElement;
     message.classList.add('show');
   }
-
   placeMark(currentClass: CircleOrX, index: number) {
     store.dispatch({
       type: 'ADD_BOARD_POSITION',
       payload: { index, mark: currentClass },
     });
   }
-
   swapTurns() {
     this.circleTurn = !this.circleTurn;
     store.dispatch({ type: 'CHECK_CIRCLE' });
   }
-
   checkWIn(currentClass: CircleOrX) {
     const cellElements = store.getState().boardPositions;
 

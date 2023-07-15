@@ -36,7 +36,13 @@ export default class extends AbstractView {
                 <div class="footer">
                         <div class="counter blue bs-none">
                                 <span>x (${
-                                  state.player === 'x' ? 'p1' : 'p2'
+                                  state.cpu_or_player === 'cpu'
+                                    ? state.player === 'x'
+                                      ? 'you'
+                                      : 'cpu'
+                                    : state.player === 'x'
+                                    ? 'p1'
+                                    : 'p2'
                                 })</span>
                                 <span>${
                                   state.player === 'x' ? state.p1 : state.p2
@@ -48,7 +54,13 @@ export default class extends AbstractView {
                         </div>
                         <div class="counter yellow bs-none">
                                 <span>o (${
-                                  state.player === 'circle' ? 'p1' : 'p2'
+                                  state.cpu_or_player === 'cpu'
+                                    ? state.player === 'circle'
+                                      ? 'you'
+                                      : 'cpu'
+                                    : state.player === 'circle'
+                                    ? 'p1'
+                                    : 'p2'
                                 })</span>
                                 <span>${
                                   state.player === 'circle'

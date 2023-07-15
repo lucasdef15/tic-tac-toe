@@ -10,6 +10,7 @@ export interface State {
   isCircle: boolean;
   boardPositions: string[];
   cpu_or_player: 'cpu' | 'player' | null;
+  count: number;
 }
 
 // Define your initial state
@@ -22,7 +23,8 @@ const initialState: State = {
   p2: 0,
   isCircle: true,
   boardPositions: Array(9).fill(null),
-  cpu_or_player: null,
+  cpu_or_player: 'cpu', //change to null later
+  count: 0,
 };
 
 // Define your actions
@@ -37,6 +39,7 @@ const SET_WINNER = 'SET_WINNER';
 const SET_TIE = 'SET_TIE';
 const SET_CPU_OR_PLAYER = 'SET_CPU_OR_PLAYER';
 const QUIT_GAME = 'QUIT_GAME';
+const INCREMENT_COUNT = 'INCREMENT_COUNT';
 
 interface AddBoardPositionPayload {
   index: number;
@@ -101,6 +104,11 @@ function rootReducer(state = initialState, action: any) {
       };
     case QUIT_GAME:
       return initialState;
+    case INCREMENT_COUNT:
+      return {
+        ...state,
+        count: state.count + 1,
+      };
     default:
       return state;
   }
