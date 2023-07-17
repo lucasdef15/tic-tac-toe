@@ -126,8 +126,10 @@ export default class Game {
         .then(() => this.incrementPLayers())
         .then(() => this.showMessage());
     } else if (this.isDraw()) {
+      console.log('draw');
       this.endGame(true).then(() => this.showMessage());
     } else {
+      console.log(this.isDraw());
       if (store.getState().cpu_or_player === 'cpu') {
         this.startCPU(cpuMark);
       } else {
@@ -147,12 +149,10 @@ export default class Game {
   }
 
   isDraw() {
-    const cellElements = document.querySelectorAll('[data-cell]');
-    return [...cellElements].every((cell) => {
-      return (
-        cell.classList.contains(this.CIRCLE_CLASS) ||
-        cell.classList.contains(this.X_CLASS)
-      );
+    const cellElements = store.getState().boardPositions;
+
+    return cellElements.every((cell) => {
+      return cell === this.CIRCLE_CLASS || cell === this.X_CLASS;
     });
   }
 
@@ -212,3 +212,4 @@ export default class Game {
     });
   }
 }
+
