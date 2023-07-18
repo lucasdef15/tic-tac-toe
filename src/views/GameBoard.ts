@@ -76,8 +76,12 @@ export default class extends AbstractView {
                       !state.isTie
                         ? `<p>${
                             state.player === state.current_winner
-                              ? 'player 1 wins!'
-                              : 'player 2 wins!'
+                              ? state.cpu_or_player === 'player'
+                                ? 'player 1 wins!'
+                                : 'you won!'
+                              : state.cpu_or_player === 'player'
+                              ? 'player 2 wins!'
+                              : 'oh no, you lost...'
                           }</p>`
                         : ''
                     }
@@ -95,11 +99,29 @@ export default class extends AbstractView {
                               ? '#f2b137'
                               : '#31c3bd'
                             : '#a8bfc9'
-                        }'>${state.isTie ? 'round tied' : 'Takes the roud'}</h1>
+                        }'>${
+      state.isTie
+        ? state.cpu_or_player === 'player'
+          ? 'round tied'
+          : 'restart game?'
+        : 'Takes the roud'
+    }</h1>
                     </div>
                     <div class="button-wrapper">
-                            <a href='/' class='grey' data-quit>quit</a>
-                            <button class='yellow' data-restart>next roud</button>
+                            <a href='/' class='grey' data-quit>${
+                              state.isTie
+                                ? state.cpu_or_player === 'player'
+                                  ? 'quit'
+                                  : 'no, cancel'
+                                : 'quit'
+                            }</a>
+                            <button class='yellow' data-restart>${
+                              state.isTie
+                                ? state.cpu_or_player === 'player'
+                                  ? 'next round'
+                                  : 'yes, restart'
+                                : 'next round'
+                            }</button>
                     </div>
                 </div>
         </div>

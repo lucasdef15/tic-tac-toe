@@ -4,7 +4,10 @@ import router, { navigateTo } from './routes/router';
 import Game from './logic/game';
 import store from './store/store';
 
-window.addEventListener('popstate', () => router(store.getState())); //remeber to reset every state
+window.addEventListener('popstate', () => {
+  router(store.getState());
+  store.dispatch({ type: 'QUIT_GAME' });
+});
 
 document.addEventListener('DOMContentLoaded', () => {
   document.body.addEventListener('change', (event) => {
@@ -50,6 +53,7 @@ function handleLinkClick(event: MouseEvent) {
     Game.instance.startGameCPU();
   } else {
     navigateTo(event);
+    Game.instance.startGame();
   }
 }
 
