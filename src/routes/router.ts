@@ -1,7 +1,7 @@
 import GameBoard from '../views/GameBoard';
 import Dashboard from '../views/Dashboard';
 import AbstractView from '../views/AbstractView';
-import store from '../store/store';
+import store, { State } from '../store/store';
 
 interface RouteObj {
   path: string;
@@ -20,7 +20,7 @@ export const navigateTo = (event: MouseEvent): void => {
   router(store.getState());
 };
 
-const router = async (state: any) => {
+const router = async (state: State) => {
   const routes: RouteObj[] = [
     // { path: '/404', view: () => console.log('viewing 404 page') },
     { path: '/', view: Dashboard },
