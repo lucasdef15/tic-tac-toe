@@ -10,7 +10,7 @@ export default class implements AbstractView {
     document.title = title;
   }
 
-  async getHTML() {
+  async getHTML(state: any) {
     return '';
   }
 }
