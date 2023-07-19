@@ -4,9 +4,16 @@ import router, { navigateTo } from './routes/router';
 import Game from './logic/game';
 import store from './store/store';
 
-window.addEventListener('popstate', () => {
-  router(store.getState());
-  store.dispatch({ type: 'QUIT_GAME' });
+window.addEventListener('popstate', (e) => {
+  const confirmationMsg = 'Are you sure you want to leave?';
+  if (confirm(confirmationMsg)) {
+    store.dispatch({ type: 'QUIT_GAME' });
+    navigateTo(e as unknown as MouseEvent);
+  } else {
+    e.preventDefault();
+    history.pushState(null, '', store.getState().location);
+    router(store.getState());
+  }
 });
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -38,7 +45,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
 store.subscribe(() => {
   router(store.getState());
-  console.log(store.getState());
+});
+
+window.addEventListener('beforeunload', function (event) {
+  event.preventDefault();
+  event.returnValue = '';
+  return 'Are you sure you want to leave?';
 });
 
 function handleLinkClick(event: MouseEvent) {
@@ -50,9 +62,11 @@ function handleLinkClick(event: MouseEvent) {
   }
   if (store.getState().cpu_or_player === 'cpu') {
     navigateTo(event);
-    Game.instance.startGameCPU();
+    store.dispatch({ type: 'SET_LOCATION' });
+    setTimeout(() => Game.instance.startGameCPU(), 100);
   } else {
     navigateTo(event);
+    store.dispatch({ type: 'SET_LOCATION' });
     Game.instance.startGame();
   }
 }

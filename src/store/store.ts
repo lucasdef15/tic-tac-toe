@@ -11,6 +11,7 @@ export interface State {
   boardPositions: string[];
   cpu_or_player: 'cpu' | 'player' | null;
   count: number;
+  location: string;
 }
 
 // Define your initial state
@@ -25,6 +26,7 @@ const initialState: State = {
   boardPositions: Array(9).fill(null),
   cpu_or_player: 'cpu', //change to null later
   count: 0,
+  location: ''
 };
 
 // Define your actions
@@ -40,6 +42,7 @@ const SET_TIE = 'SET_TIE';
 const SET_CPU_OR_PLAYER = 'SET_CPU_OR_PLAYER';
 const QUIT_GAME = 'QUIT_GAME';
 const INCREMENT_COUNT = 'INCREMENT_COUNT';
+const SET_LOCATION = 'SET_LOCATION';
 
 interface AddBoardPositionPayload {
   index: number;
@@ -109,6 +112,11 @@ function rootReducer(state = initialState, action: any) {
         ...state,
         count: state.count + 1,
       };
+    case SET_LOCATION:
+      return{
+      ...state,
+      location: location.href
+    }
     default:
       return state;
   }
