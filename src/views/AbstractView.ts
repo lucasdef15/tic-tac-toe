@@ -1,6 +1,8 @@
+import { State } from '../store/store';
+
 interface AbstractView {
   setTitle(title: string): void;
-  getHTML(state: any): Promise<string>;
+  getHTML(state: State): Promise<string>;
 }
 
 export default class implements AbstractView {
@@ -10,7 +12,7 @@ export default class implements AbstractView {
     document.title = title;
   }
 
-  async getHTML(state: any) {
-    return '';
+  async getHTML(state: State) {
+    return `${state}`;
   }
 }
